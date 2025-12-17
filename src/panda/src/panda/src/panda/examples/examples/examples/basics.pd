@@ -1,0 +1,5 @@
+LET x = 5
+LET y = 10
+ADD x y
+RANDOM 1 100
+NOW
