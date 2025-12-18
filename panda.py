@@ -112,24 +112,27 @@ class PandaInterpreter:
     def get_var(self, a): return self.memory.get(str(a[0]), 0)
 
 # ==========================================
-# COMMAND LINE INTERFACE
+# COMMAND LINE INTERFACE (FINAL POLISH)
 # ==========================================
 if __name__ == "__main__":
     verify_integrity()
     
+    # 1. Agar sirf 'panda' likha ho (No arguments)
     if len(sys.argv) < 2:
         show_logo()
         console.print(f"[bold cyan]Panda Language v{VERSION}[/bold cyan]")
-        console.print("[white]Usage: [/white][bold yellow]panda <filename.pd>[/bold yellow]")
-        console.print("[white]Info:  [/white][bold yellow]panda --version[/bold yellow]")
+        console.print("[white]Istimal:[/white] [bold yellow]panda <filename.pd>[/bold yellow]")
+        console.print("[white]Version:[/white] [bold yellow]panda --version[/bold yellow]")
         sys.exit()
 
     arg = sys.argv[1]
 
+    # 2. Agar version check karna ho
     if arg == "--version":
         version_box = f"[bold green]PANDA 🐼[/bold green]\n[white]Version: {VERSION}[/white]\n[bold yellow]Dev: {DEVELOPER}[/bold yellow]"
         console.print(Panel(version_box, border_style="blue", title="System Info", expand=False))
     
+    # 3. Agar file run karni ho
     else:
         if os.path.exists(arg):
             show_branding_banner()
@@ -140,7 +143,9 @@ if __name__ == "__main__":
                     tree = parser.parse(code)
                     PandaInterpreter().run(tree)
             except Exception as e:
-                console.print(f"[bold red]Panda Error:[/bold red] {e}")
+                console.print(f"[bold red]Panda Error 🐼:[/bold red] {e}")
         else:
+            # 4. Agar file name galat ho
             show_logo()
-            console.print(f"[bold red]Error:[/bold red] File '{arg}' nahi mili!")
+            console.print(f"[bold red]Ghalti:[/bold red] File [bold yellow]'{arg}'[/bold yellow] nahi mili!")
+            console.print("[white]Check karein ke file folder mein mojood hai.[/white]")
