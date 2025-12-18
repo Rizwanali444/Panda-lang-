@@ -11,7 +11,7 @@ console = Console()
 # 🛡️ PANDA CORE SECURITY & INFO
 # ==========================================
 DEVELOPER = "Rizwan Ali"
-VERSION = "0.1"
+VERSION = "0.2" # Updated to 0.2
 
 def verify_integrity():
     if DEVELOPER != "Rizwan Ali":
@@ -60,7 +60,7 @@ panda_grammar = r"""
 # ==========================================
 class PandaInterpreter:
     def __init__(self):
-        self.variables = {} # Yeh memory commands ke darmiyan variables yaad rakhti hai
+        self.variables = {} 
 
     def run(self, tree):
         if isinstance(tree, Tree):
@@ -98,6 +98,8 @@ class PandaInterpreter:
 # 🚀 CLI & REPL ENGINE
 # ==========================================
 def start_repl():
+    # Pehle integrity check
+    verify_integrity()
     show_logo()
     console.print("[bold cyan]Panda Interactive Shell (REPL)[/bold cyan]")
     console.print("[dim white]Type 'niklo' to exit, 'saaf' to clear screen.[/dim white]\n")
@@ -107,6 +109,7 @@ def start_repl():
 
     while True:
         try:
+            # Python ki tarah history enabled input
             user_input = console.input("[bold pink]panda ❯ [/bold pink]")
             
             if user_input.lower() in ["exit", "niklo", "quit", "exit()"]:
@@ -124,33 +127,35 @@ def start_repl():
             console.print(f"[bold red]Ghalti:[/bold red] {e}")
 
 if __name__ == "__main__":
-    verify_integrity()
+    # Logic check: Arguments kitne hain?
+    args = sys.argv[1:]
     
-    # CASE 1: Sirf 'panda' (REPL Mode)
-    if len(sys.argv) < 2:
+    # 1. Agar koi argument nahi (Sirf 'panda') -> Start REPL
+    if not args:
         start_repl()
     
+    # 2. Agar argument hai
     else:
-        arg = sys.argv[1]
+        command = args[0]
         
-        # CASE 2: Version Check
-        if arg == "--version":
+        # Version Check
+        if command == "--version":
             version_box = f"[bold green]PANDA 🐼[/bold green]\n[white]Version: {VERSION}[/white]\n[bold yellow]Dev: {DEVELOPER}[/bold yellow]"
             console.print(Panel(version_box, border_style="blue", title="System Info", expand=False))
         
-        # CASE 3: File Run
-        elif os.path.exists(arg):
+        # File Run logic
+        elif os.path.exists(command):
             show_branding_banner()
             parser = Lark(panda_grammar, parser='lalr')
             interpreter = PandaInterpreter()
-            with open(arg, 'r') as f:
+            with open(command, 'r') as f:
                 try:
                     tree = parser.parse(f.read())
                     interpreter.run(tree)
                 except Exception as e:
                     console.print(f"[bold red]Panda Error:[/bold red] {e}")
         
-        # CASE 4: File Not Found
+        # Error: Kuch likha hai par file nahi mili
         else:
             show_logo()
-            console.print(f"[bold red]Ghalti:[/bold red] File '{arg}' nahi mili!")
+            console.print(f"[bold red]Ghalti:[/bold red] File '{command}' nahi mili!")
