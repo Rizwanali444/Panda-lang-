@@ -102,13 +102,27 @@ class PandaInterpreter:
             os.system(f'termux-tts-speak "{ans}"')
         except: console.print("[red]Internet error.[/red]")
 
-    def system_status(self, _):
-        battery = psutil.sensors_battery()
+        def system_status(self, _):
+        t = Table(title="[bold yellow]Panda System Monitor[/bold yellow]", border_style="cyan")
+        t.add_column("Resource", style="bold magenta")
+        t.add_column("Usage", style="bold green")
+
+        # Battery Info (With Error Handling)
+        try:
+            battery = psutil.sensors_battery()
+            percent = f"{battery.percent}%" if battery else "N/A"
+        except Exception:
+            percent = "[red]Permission Denied[/red]"
+        
+        # RAM Info (Ismein permission ka masla nahi hota)
         ram = psutil.virtual_memory()
-        t = Table(title="System Monitor")
-        t.add_row("Battery", f"{battery.percent}%" if battery else "N/A")
-        t.add_row("RAM Used", f"{ram.percent}%")
+        ram_usage = f"{ram.percent}%"
+
+        t.add_row("Battery", percent)
+        t.add_row("RAM Used", ram_usage)
+        
         console.print(t)
+
 
     def file_lock(self, children):
         fn = str(children[0]).strip('"')
