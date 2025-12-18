@@ -16,7 +16,7 @@ console = Console()
 # 🛡️ PANDA CORE INFO & SECURITY
 # ==========================================
 DEVELOPER = "Rizwan Ali"
-VERSION = "1.0 (Stable)"
+VERSION = "1.2 (Final Pro)"
 
 def verify_integrity():
     if DEVELOPER != "Rizwan Ali":
@@ -36,7 +36,7 @@ def show_logo():
     console.print(Panel(logo, border_style="bold green", padding=(0, 2), expand=False))
 
 # ==========================================
-# 📝 PANDA MASTER GRAMMAR (v0.1 - v1.0)
+# 📝 PANDA MASTER GRAMMAR (v1.2 ADVANCED)
 # ==========================================
 panda_grammar = r"""
     start: instruction+
@@ -45,13 +45,15 @@ panda_grammar = r"""
                | IDENTIFIER "=" ("pucho" | "ask") STRING -> ask_user
                | ("if" | "agar") condition ":" instruction+ [("else" | "warna") ":" instruction+] -> if_else
                | ("while" | "jab_tak") condition ":" instruction+ -> while_loop
-               | ("table" | "naqsha") STRING "," STRING -> table_action
+               | ("for" | "dohrao") IDENTIFIER "in" NUMBER "," NUMBER ":" instruction+ -> for_loop
+               | ("table" | "naqsha") expr "," expr    -> table_action
                | ("create" | "banao") STRING           -> file_create
-               | ("write" | "likho") STRING "," STRING -> file_write
+               | ("write" | "likho") expr "," expr     -> file_write
                | ("read" | "parho") STRING             -> file_read
                | ("run" | "chalao") STRING             -> sys_run
                | ("get" | "le_ao") STRING              -> http_get
                | ("time" | "waqt")                     -> show_time
+               | ("help" | "madad")                    -> show_help
                | ("clear" | "saaf")                    -> clear_screen
                | "load" NUMBER                         -> load_action
                | expr                                  -> direct_expr
@@ -72,7 +74,7 @@ panda_grammar = r"""
 """
 
 # ==========================================
-# ⚙️ INTERPRETER (LOGIC CENTER)
+# ⚙️ INTERPRETER (ADVANCED LOGIC)
 # ==========================================
 class PandaInterpreter:
     def __init__(self):
@@ -89,13 +91,22 @@ class PandaInterpreter:
         for child in children: res = self.run(child)
         return res
 
+    def show_help(self, _):
+        t = Table(title="🐼 Panda Engine Help Guide", header_style="bold cyan")
+        t.add_column("Command", style="yellow")
+        t.add_column("Usage Example", style="white")
+        t.add_row("dikhao", 'dikhao "Hello" + naam')
+        t.add_row("dohrao", 'dohrao i in 0, 10: dikhao i')
+        t.add_row("pucho", 'naam = pucho "Naam?"')
+        t.add_row("agar", 'agar x > 5: dikhao "Bara hai"')
+        t.add_row("naqsha", 'naqsha "Col1, Col2", "Val1, Val2"')
+        t.add_row("le_ao", 'le_ao "https://google.com"')
+        t.add_row("chalao", 'chalao "ls -la"')
+        console.print(t)
+
     def show_action(self, children):
         val = self.run(children[0])
         console.print(f"[bold green]>>>[/bold green] {val}")
-
-    def direct_expr(self, children):
-        val = self.run(children[0])
-        if val is not None: console.print(f"[bold green]>>>[/bold green] {val}")
 
     def ask_user(self, children):
         var_name, prompt = str(children[0]), str(children[1]).strip('"')
@@ -119,42 +130,44 @@ class PandaInterpreter:
         while self.run(cond):
             for node in body: self.run(node)
 
+    # 🚀 NAYA FEATURE: FOR LOOP (dohrao)
+    def for_loop(self, children):
+        var_name = str(children[0])
+        start = int(float(children[1]))
+        end = int(float(children[2]))
+        body = children[3:]
+        for i in range(start, end):
+            self.variables[var_name] = float(i)
+            for node in body: self.run(node)
+
     def http_get(self, children):
         url = str(children[0]).strip('"')
-        console.print(f"[dim]Fetching from {url}...[/dim]")
         try:
             r = requests.get(url, timeout=5)
-            console.print(Panel(r.text[:300] + "...", title="Web Content", border_style="green"))
-        except: console.print("[bold red]Ghalti:[/bold red] Internet connection check karein.")
-
-    def sys_run(self, children):
-        os.system(str(children[0]).strip('"'))
-
-    def show_time(self, _):
-        console.print(f"[bold cyan]Waqt:[/bold cyan] {datetime.now().strftime('%H:%M:%S')}")
-
-    def file_create(self, children):
-        with open(str(children[0]).strip('"'), 'w') as f: f.write("")
-    
-    def file_write(self, children):
-        with open(str(children[0]).strip('"'), 'a') as f: f.write(str(children[1]).strip('"') + "\n")
-
-    def file_read(self, children):
-        fn = str(children[0]).strip('"')
-        if os.path.exists(fn):
-            with open(fn, 'r') as f: console.print(Panel(f.read(), title=fn))
-        else: console.print("[bold red]File nahi mili![/bold red]")
+            console.print(Panel(r.text[:300] + "...", title="Web Data"))
+        except: console.print("[bold red]Ghalti: Internet offline hai![/bold red]")
 
     def table_action(self, children):
-        h, d = str(children[0]).strip('"').split(","), str(children[1]).strip('"').split(",")
+        h_val, d_val = self.run(children[0]), self.run(children[1])
+        h, d = str(h_val).split(","), str(d_val).split(",")
         t = Table(header_style="bold magenta")
         for col in h: t.add_column(col.strip())
         t.add_row(*[val.strip() for val in d])
         console.print(t)
 
+    def sys_run(self, children): os.system(str(children[0]).strip('"'))
+    def show_time(self, _): console.print(f"[bold cyan]Waqt:[/bold cyan] {datetime.now().strftime('%H:%M:%S')}")
+    def file_create(self, children):
+        with open(str(children[0]).strip('"'), 'w') as f: f.write("")
+    def file_write(self, children):
+        fn, txt = self.run(children[0]), self.run(children[1])
+        with open(str(fn).strip('"'), 'a') as f: f.write(str(txt).strip('"') + "\n")
+    def file_read(self, children):
+        fn = str(children[0]).strip('"')
+        if os.path.exists(fn):
+            with open(fn, 'r') as f: console.print(Panel(f.read(), title=fn))
     def load_action(self, children):
-        for _ in track(range(int(float(children[0]))), description="[cyan]Working..."): time.sleep(0.05)
-
+        for _ in track(range(int(float(children[0]))), description="[cyan]Processing..."): time.sleep(0.05)
     def gt(self, c): return self.run(c[0]) > self.run(c[1])
     def lt(self, c): return self.run(c[0]) < self.run(c[1])
     def eq(self, c): return self.run(c[0]) == self.run(c[1])
@@ -171,11 +184,11 @@ class PandaInterpreter:
     def clear_screen(self, _): os.system('clear')
 
 # ==========================================
-# 🚀 MAIN LAUNCHER
+# 🚀 CLI REPL
 # ==========================================
 def start_repl():
     verify_integrity(); show_logo()
-    console.print("[bold cyan]Panda Master v1.0[/bold cyan] | Rizwan's Power Engine\n")
+    console.print("[bold cyan]Panda Engine v1.2[/bold cyan] | Rizwan's Power Edition\n")
     i, p = PandaInterpreter(), Lark(panda_grammar, parser='lalr')
     while True:
         try:
