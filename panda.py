@@ -37,17 +37,17 @@ def show_branding_banner():
     console.print("[dim white]──────────────────────────────────────────────────[/dim white]")
 
 def show_logo():
-    # ✨ Naya Cute Panda Logo (Fixed for Termux)
+    # ✨ Super Cute & Colorful Panda Logo
     logo = r"""
-[bold white]       .--.        .--.      [/bold white]
-[bold white]      /    \      /    \     [/bold white]
-[bold white]     |      \____/      |    [/bold white] [bold cyan]PANDA 🐼 v0.1[/bold cyan]
-[bold white]     |  [bold black]O[/bold black]          [bold black]O[/bold black]  |    [/bold white] [bold yellow]By Rizwan Ali[/bold yellow]
-[bold white]      \    [bold pink]  vv  [/bold pink]    /     [/bold white]
-[bold white]       \   [bold red]  ~~  [/bold red]   /      [/bold white]
-[bold white]        '--______--'       [/bold white]
+[bold black]      _      _      [/bold black]
+[bold white]    m(  )mm(  )m    [/bold white]
+[bold white]   (  [/bold black]●[/bold black]  ..  [/bold black]●[/bold black]  )   [/bold white] [bold cyan]PANDA 🐼 v0.1[/bold cyan]
+[bold white]    >   [/bold pink]♥[/bold pink]   <     [/bold white] [bold yellow]By Rizwan Ali[/bold yellow]
+[bold white]   (    [/bold red]~~[/bold red]    )    [/bold white]
+[bold white]    (  [/bold cyan]v  v[/bold cyan]  )     [/bold white]
+[bold white]     [/bold black]""    ""[/bold black]      
     """
-    console.print(Panel(logo, border_style="magenta", expand=False))
+    console.print(Panel(logo, border_style="bold magenta", padding=(0, 2), expand=False))
 
 # ==========================================
 # PANDA GRAMMAR & INTERPRETER
@@ -113,17 +113,32 @@ class PandaInterpreter:
     def get_var(self, a): return self.memory.get(str(a[0]), 0)
 
 # ==========================================
-# COMMAND LINE INTERFACE (CLEANED)
+# COMMAND LINE INTERFACE (REPL SUPPORT)
 # ==========================================
 if __name__ == "__main__":
     verify_integrity()
     
-    # Check arguments
+    # INTERACTIVE SHELL (If only 'panda' is typed)
     if len(sys.argv) < 2:
         show_logo()
-        console.print(f"[bold cyan]Panda Language v{VERSION}[/bold cyan]")
-        console.print("[white]Istimal:[/white] [bold yellow]panda <filename.pd>[/bold yellow]")
-        console.print("[white]Version:[/white] [bold yellow]panda --version[/bold yellow]")
+        console.print(f"[bold cyan]Panda Interactive Shell v{VERSION}[/bold cyan]")
+        console.print("[dim white]Type 'niklo' or 'exit' to quit[/dim white]\n")
+        
+        interpreter = PandaInterpreter()
+        parser = Lark(panda_grammar, parser='lalr')
+        
+        while True:
+            try:
+                code_line = console.input("[bold pink]panda ❯ [/bold pink]")
+                if code_line.lower() in ["exit", "exit()", "niklo", "quit"]:
+                    console.print("[yellow]Panda shell band ho raha hai. Phir milenge! 🐼[/yellow]")
+                    break
+                if not code_line.strip(): continue
+                
+                tree = parser.parse(code_line)
+                interpreter.run(tree)
+            except Exception as e:
+                console.print(f"[bold red]Error:[/bold red] {e}")
         sys.exit()
 
     arg = sys.argv[1]
@@ -133,7 +148,6 @@ if __name__ == "__main__":
         console.print(Panel(version_box, border_style="blue", title="System Info", expand=False))
     
     else:
-        # Script execution logic
         if os.path.exists(arg):
             show_branding_banner()
             try:
@@ -145,7 +159,6 @@ if __name__ == "__main__":
             except Exception as e:
                 console.print(f"[bold red]Panda Error 🐼:[/bold red] {e}")
         else:
-            # File not found error with Logo
             show_logo()
-            console.print(f"[bold red]Ghalti:[/bold red] File [bold yellow]'{arg}'[/bold yellow] nahi mili!")
-            console.print("[white]Mashwara: Check karein ke file ka naam sahi hai.[/white]")
+            console.print(f"[bold red]Ghalti:[/bold red] File '{arg}' nahi mili!")
+            console.print("[white]Istimal:[/white] [bold yellow]panda <file.pd>[/bold yellow] ya sirf [bold yellow]panda[/bold yellow]")
