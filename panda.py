@@ -112,11 +112,12 @@ class PandaInterpreter:
     def get_var(self, a): return self.memory.get(str(a[0]), 0)
 
 # ==========================================
-# COMMAND LINE INTERFACE
+# COMMAND LINE INTERFACE (FIXED)
 # ==========================================
 if __name__ == "__main__":
     verify_integrity()
     
+    # Agar koi argument na ho (Sirf 'panda' likha ho)
     if len(sys.argv) < 2:
         show_logo()
         console.print(f"[bold cyan]Panda Language v{VERSION}[/bold cyan]")
@@ -125,8 +126,11 @@ if __name__ == "__main__":
 
     arg = sys.argv[1]
 
+    # Version check command
     if arg == "--version":
         console.print(Panel(f"[bold green]Panda 🐼 Version:[/bold green] {VERSION}\n[bold yellow]Developer:[/bold yellow] {DEVELOPER}", border_style="blue", expand=False))
+    
+    # Script file run karne ke liye
     else:
         if os.path.exists(arg):
             show_branding_banner()
@@ -139,4 +143,7 @@ if __name__ == "__main__":
             except Exception as e:
                 console.print(f"[bold red]Panda Error:[/bold red] {e}")
         else:
-            console.print(f"[bold red]Error:[/bold red] File '{arg}' not found.")
+            # Agar file name galat ho ya file na ho
+            show_logo()
+            console.print(f"[bold red]Error:[/bold red] File '{arg}' nahi mili!")
+            console.print("[yellow]Tip: Check karein ke file ka naam sahi hai ya nahi.[/yellow]")
