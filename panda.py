@@ -1,17 +1,14 @@
 import sys
 import os
-import readline  # Python ki tarah Up-Arrow history ke liye
+import readline
 from lark import Lark, Tree
 from rich.console import Console
 from rich.panel import Panel
 
 console = Console()
 
-# ==========================================
-# 🛡️ PANDA CORE SECURITY & INFO
-# ==========================================
 DEVELOPER = "Rizwan Ali"
-VERSION = "0.2" # Updated to 0.2
+VERSION = "0.2"
 
 def verify_integrity():
     if DEVELOPER != "Rizwan Ali":
@@ -19,7 +16,6 @@ def verify_integrity():
         sys.exit()
 
 def show_logo():
-    # 🌈 Rainbow Colorful Cute Panda Logo
     logo = (
         "[bold magenta]      _      _      [/bold magenta]\n"
         "[bold cyan]    m( )mm( )m    [/bold cyan]\n"
@@ -31,14 +27,7 @@ def show_logo():
     )
     console.print(Panel(logo, border_style="bold green", padding=(0, 2), expand=False))
 
-def show_branding_banner():
-    verify_integrity()
-    console.print(f"[bold yellow]( 🐼 )[/bold yellow] [bold cyan]PANDA ENGINE v{VERSION}[/bold cyan] | [bold white]By: {DEVELOPER}[/bold white]")
-    console.print("[dim white]──────────────────────────────────────────────────[/dim white]")
-
-# ==========================================
-# 📝 PANDA GRAMMAR
-# ==========================================
+# --- Grammar and Interpreter remains same ---
 panda_grammar = r"""
     start: instruction+
     ?instruction: ("show" | "dikhao") expr             -> show_action
@@ -52,40 +41,26 @@ panda_grammar = r"""
     %import common.NUMBER
     %import common.WS
     %ignore WS
-    %ignore /#.*/
 """
 
-# ==========================================
-# ⚙️ INTERPRETER WITH SESSION MEMORY
-# ==========================================
 class PandaInterpreter:
-    def __init__(self):
-        self.variables = {} 
-
+    def __init__(self): self.variables = {} 
     def run(self, tree):
         if isinstance(tree, Tree):
             method = getattr(self, tree.data, self.generic_run)
             return method(tree.children)
         return tree
-
     def generic_run(self, children):
         res = None
         for child in children: res = self.run(child)
         return res
-
     def show_action(self, children):
         val = self.run(children[0])
         console.print(f"[bold green]>>>[/bold green] [white]{val}[/white]")
-
     def assign_var(self, children):
-        name = str(children[0])
-        val = self.run(children[1])
-        self.variables[name] = val
-        return val
-
-    def clear_screen(self, _):
-        os.system('clear')
-
+        name = str(children[0]); val = self.run(children[1])
+        self.variables[name] = val; return val
+    def clear_screen(self, _): os.system('clear')
     def add(self, a): return self.run(a[0]) + self.run(a[1])
     def sub(self, a): return self.run(a[0]) - self.run(a[1])
     def mul(self, a): return self.run(a[0]) * self.run(a[1])
@@ -94,68 +69,47 @@ class PandaInterpreter:
     def string(self, a): return str(a[0]).strip('"')
     def get_var(self, a): return self.variables.get(str(a[0]), 0)
 
-# ==========================================
-# 🚀 CLI & REPL ENGINE
-# ==========================================
 def start_repl():
-    # Pehle integrity check
-    verify_integrity()
     show_logo()
-    console.print("[bold cyan]Panda Interactive Shell (REPL)[/bold cyan]")
-    console.print("[dim white]Type 'niklo' to exit, 'saaf' to clear screen.[/dim white]\n")
-    
+    console.print("[bold cyan]Panda Shell Active[/bold cyan] [dim](niklo to exit)[/dim]\n")
     interpreter = PandaInterpreter()
     parser = Lark(panda_grammar, parser='lalr')
-
     while True:
         try:
-            # Python ki tarah history enabled input
             user_input = console.input("[bold pink]panda ❯ [/bold pink]")
-            
-            if user_input.lower() in ["exit", "niklo", "quit", "exit()"]:
-                console.print("[bold yellow]🐼 Alvida, Rizwan! Panda Shell band ho raha hai.[/bold yellow]")
-                break
-                
+            if user_input.lower() in ["exit", "niklo", "quit"]: break
             if not user_input.strip(): continue
-            
             tree = parser.parse(user_input)
             interpreter.run(tree)
-            
-        except EOFError:
-            break
         except Exception as e:
             console.print(f"[bold red]Ghalti:[/bold red] {e}")
 
+# ==========================================
+# 🚀 FINAL CLI LOGIC (THE FIX)
+# ==========================================
 if __name__ == "__main__":
-    # Logic check: Arguments kitne hain?
-    args = sys.argv[1:]
+    verify_integrity()
     
-    # 1. Agar koi argument nahi (Sirf 'panda') -> Start REPL
+    # Check if we have a real filename (not just an empty string or nothing)
+    args = [a for a in sys.argv[1:] if a.strip()]
+    
     if not args:
+        # AGAR KUCH NAHI LIKHA TO SEEDHA REPL
         start_repl()
-    
-    # 2. Agar argument hai
     else:
-        command = args[0]
-        
-        # Version Check
-        if command == "--version":
-            version_box = f"[bold green]PANDA 🐼[/bold green]\n[white]Version: {VERSION}[/white]\n[bold yellow]Dev: {DEVELOPER}[/bold yellow]"
-            console.print(Panel(version_box, border_style="blue", title="System Info", expand=False))
-        
-        # File Run logic
-        elif os.path.exists(command):
-            show_branding_banner()
+        cmd = args[0]
+        if cmd == "--version":
+            console.print(Panel(f"PANDA 🐼 v{VERSION}\nDev: {DEVELOPER}", border_style="blue"))
+        elif os.path.exists(cmd):
+            # FILE RUN KARO
             parser = Lark(panda_grammar, parser='lalr')
             interpreter = PandaInterpreter()
-            with open(command, 'r') as f:
+            with open(cmd, 'r') as f:
                 try:
                     tree = parser.parse(f.read())
                     interpreter.run(tree)
-                except Exception as e:
-                    console.print(f"[bold red]Panda Error:[/bold red] {e}")
-        
-        # Error: Kuch likha hai par file nahi mili
+                except Exception as e: console.print(f"[bold red]Error:[/bold red] {e}")
         else:
-            show_logo()
-            console.print(f"[bold red]Ghalti:[/bold red] File '{command}' nahi mili!")
+            # AGAR FILE NAME GHALAT HAI TAB BHI REPL START KAR DO TAKAY ERROR NA AYE
+            console.print(f"[bold red]Ghalti:[/bold red] '{cmd}' nahi mili. REPL start kar raha hoon...")
+            start_repl()
