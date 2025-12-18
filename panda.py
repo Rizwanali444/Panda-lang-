@@ -202,5 +202,29 @@ def start_repl():
             i.run(p.parse(inp))
         except Exception as e: console.print(f"[red]Error:[/red] {e}")
 
+# ==========================================
+# 🚀 FILE RUNNER & REPL LOGIC
+# ==========================================
+def run_file(filename):
+    if os.path.exists(filename):
+        with open(filename, 'r') as f:
+            script_content = f.read()
+        
+        # Sirf tabhi run karein agar file khali na ho
+        if script_content.strip():
+            i, p = PandaInterpreter(), Lark(panda_grammar, parser='lalr')
+            try:
+                # File execute karne se pehle logo nahi dikhayenge (Direct Run)
+                i.run(p.parse(script_content))
+            except Exception as e:
+                console.print(f"[red]Error in {filename}:[/red] {e}")
+    else:
+        console.print(f"[red]Ghalti:[/red] File '{filename}' nahi mili!")
+
 if __name__ == "__main__":
-    start_repl()
+    # Agar terminal mein 'panda filename.pd' likha ho
+    if len(sys.argv) > 1:
+        run_file(sys.argv[1])
+    # Agar sirf 'panda' likh kar enter kiya ho
+    else:
+        start_repl()
