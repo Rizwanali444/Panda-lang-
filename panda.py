@@ -22,31 +22,31 @@ VERSION = "0.1"
 COPYRIGHT = f"© 2024-2025 {DEVELOPER}"
 
 def show_security_alert():
-    # Warning in a small red box
     alert_text = "[bold white]🛑 SECURITY ALERT[/bold white]\n[white]Engine Integrity Compromised!\nModification not allowed.[/white]"
     console.print(Panel(alert_text, border_style="red", title="[bold red]Error[/bold red]", expand=False))
     sys.exit()
 
 def verify_integrity():
-    # Simple check: Agar naam 'Rizwan Ali' nahi hai to block
     if DEVELOPER != "Rizwan Ali":
         show_security_alert()
 
 def show_branding_banner():
     verify_integrity()
-    banner_text = f"[bold cyan]🐼 PANDA ENGINE v{VERSION}[/bold cyan]\n[bold yellow]By: {DEVELOPER}[/bold yellow]"
-    console.print(Panel(banner_text, border_style="magenta", expand=False))
+    # Script chalte waqt chota cute banner
+    banner_text = f"[bold yellow]( 🐼 )[/bold yellow] [bold cyan]PANDA ENGINE v{VERSION}[/bold cyan] | [bold white]By: {DEVELOPER}[/bold white]"
+    console.print(banner_text)
+    console.print("[dim white]──────────────────────────────────────────────────[/dim white]")
 
 def show_logo():
+    # Naya aur Cute ASCII Logo
     logo = r"""
-    [bold green]  .--.      .--.   [/bold green][bold white]PANDA 🐼[/bold white]
-    [bold green] / _  \    /  _ \  [/bold green][bold yellow]By Rizwan Ali[/bold yellow]
-    [bold green]| ( \  \__/  / ) | [/bold green]
-    [bold green] \  \ [bold white](  o)  (o  )[/bold white]  / /  [/bold green]
-    [bold green]  \  \    [bold pink]__[/bold pink]    / /   [/bold green]
-    [bold green]   \  \  [bold red](__)[/bold red]  / /    [/bold green]
+    [bold white]      pd      pd      [/bold white]
+    [bold white]    (  ^  ..  ^  )    [/bold white][bold cyan]  PANDA 🐼 v0.1[/bold cyan]
+    [bold white]     >   ^   <        [/bold white][bold yellow]  By Rizwan Ali[/bold yellow]
+    [bold white]    (    v    )       [/bold white]
+    [bold white]     (  _ _  )        [/bold white]
     """
-    console.print(logo)
+    console.print(Panel(logo, border_style="magenta", expand=False))
 
 # ==========================================
 # PANDA GRAMMAR & INTERPRETER
@@ -112,25 +112,24 @@ class PandaInterpreter:
     def get_var(self, a): return self.memory.get(str(a[0]), 0)
 
 # ==========================================
-# COMMAND LINE INTERFACE (FIXED)
+# COMMAND LINE INTERFACE
 # ==========================================
 if __name__ == "__main__":
     verify_integrity()
     
-    # Agar koi argument na ho (Sirf 'panda' likha ho)
     if len(sys.argv) < 2:
         show_logo()
         console.print(f"[bold cyan]Panda Language v{VERSION}[/bold cyan]")
-        console.print("[white]Usage: panda <filename.pd> | panda --version[/white]")
+        console.print("[white]Usage: [/white][bold yellow]panda <filename.pd>[/bold yellow]")
+        console.print("[white]Info:  [/white][bold yellow]panda --version[/bold yellow]")
         sys.exit()
 
     arg = sys.argv[1]
 
-    # Version check command
     if arg == "--version":
-        console.print(Panel(f"[bold green]Panda 🐼 Version:[/bold green] {VERSION}\n[bold yellow]Developer:[/bold yellow] {DEVELOPER}", border_style="blue", expand=False))
+        version_box = f"[bold green]PANDA 🐼[/bold green]\n[white]Version: {VERSION}[/white]\n[bold yellow]Dev: {DEVELOPER}[/bold yellow]"
+        console.print(Panel(version_box, border_style="blue", title="System Info", expand=False))
     
-    # Script file run karne ke liye
     else:
         if os.path.exists(arg):
             show_branding_banner()
@@ -143,7 +142,5 @@ if __name__ == "__main__":
             except Exception as e:
                 console.print(f"[bold red]Panda Error:[/bold red] {e}")
         else:
-            # Agar file name galat ho ya file na ho
             show_logo()
             console.print(f"[bold red]Error:[/bold red] File '{arg}' nahi mili!")
-            console.print("[yellow]Tip: Check karein ke file ka naam sahi hai ya nahi.[/yellow]")
