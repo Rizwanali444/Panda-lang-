@@ -1,9 +1,12 @@
 import sys
 import os
-import readline  # Python ki tarah Up-Arrow history ke liye
+import readline
+import time
 from lark import Lark, Tree
 from rich.console import Console
 from rich.panel import Panel
+from rich.table import Table
+from rich.progress import track
 
 console = Console()
 
@@ -11,7 +14,7 @@ console = Console()
 # 🛡️ PANDA CORE SECURITY & INFO
 # ==========================================
 DEVELOPER = "Rizwan Ali"
-VERSION = "0.3"
+VERSION = "0.6"
 
 def verify_integrity():
     if DEVELOPER != "Rizwan Ali":
@@ -19,7 +22,6 @@ def verify_integrity():
         sys.exit()
 
 def show_logo():
-    # 🌈 Rainbow Colorful Cute Panda Logo
     logo = (
         "[bold magenta]      _      _      [/bold magenta]\n"
         "[bold cyan]    m( )mm( )m    [/bold cyan]\n"
@@ -32,14 +34,18 @@ def show_logo():
     console.print(Panel(logo, border_style="bold green", padding=(0, 2), expand=False))
 
 # ==========================================
-# 📝 PANDA GRAMMAR (MATH + VARIABLES + IF-ELSE)
+# 📝 PANDA GRAMMAR v0.6 (ULTIMATE)
 # ==========================================
 panda_grammar = r"""
     start: instruction+
     ?instruction: ("show" | "dikhao") expr             -> show_action
                | IDENTIFIER "=" expr                   -> assign_var
+               | IDENTIFIER "=" ("pucho" | "ask") STRING -> ask_user
                | ("if" | "agar") condition ":" instruction+ [("else" | "warna") ":" instruction+] -> if_else
+               | ("while" | "jab_tak") condition ":" instruction+ -> while_loop
+               | ("table" | "naqsha") STRING "," STRING -> table_action
                | ("clear" | "saaf")                    -> clear_screen
+               | "load" NUMBER                         -> load_action
                | expr                                  -> direct_expr
 
     ?condition: expr ">" expr                          -> gt
@@ -55,11 +61,10 @@ panda_grammar = r"""
     %import common.NUMBER
     %import common.WS
     %ignore WS
-    %ignore /#.*/
 """
 
 # ==========================================
-# ⚙️ INTERPRETER (LOGIC & MEMORY)
+# ⚙️ INTERPRETER (PROFESSIONAL LOGIC)
 # ==========================================
 class PandaInterpreter:
     def __init__(self):
@@ -73,43 +78,53 @@ class PandaInterpreter:
 
     def generic_run(self, children):
         res = None
-        for child in children:
-            res = self.run(child)
+        for child in children: res = self.run(child)
         return res
 
     def show_action(self, children):
         val = self.run(children[0])
-        console.print(f"[bold green]>>>[/bold green] [white]{val}[/white]")
+        console.print(f"[bold green]>>>[/bold green] {val}")
 
     def direct_expr(self, children):
         val = self.run(children[0])
-        if val is not None:
-            console.print(f"[bold green]>>>[/bold green] [white]{val}[/white]")
+        if val is not None: console.print(f"[bold green]>>>[/bold green] {val}")
+
+    def ask_user(self, children):
+        var_name, prompt = str(children[0]), str(children[1]).strip('"')
+        val = console.input(f"[bold yellow]{prompt}[/bold yellow] ")
+        try: self.variables[var_name] = float(val)
+        except: self.variables[var_name] = val
 
     def assign_var(self, children):
-        name = str(children[0])
-        val = self.run(children[1])
+        name, val = str(children[0]), self.run(children[1])
         self.variables[name] = val
-        return None
 
     def if_else(self, children):
-        cond = self.run(children[0])
-        if cond:
-            # IF part execute karein
+        if self.run(children[0]):
             for i in range(1, len(children)):
-                if isinstance(children[i], Tree) and children[i].data != "warna":
-                    self.run(children[i])
+                if isinstance(children[i], Tree) and children[i].data != "warna": self.run(children[i])
                 else: break
-        elif len(children) > 2:
-             # ELSE part execute karein
-             self.run(children[-1])
+        elif len(children) > 2: self.run(children[-1])
 
-    # Comparisons
+    def while_loop(self, children):
+        while self.run(children[0]):
+            for i in range(1, len(children)): self.run(children[i])
+
+    def table_action(self, children):
+        headers = str(children[0]).strip('"').split(",")
+        data = str(children[1]).strip('"').split(",")
+        t = Table(show_header=True, header_style="bold magenta")
+        for h in headers: t.add_column(h.strip())
+        t.add_row(*[d.strip() for d in data])
+        console.print(t)
+
+    def load_action(self, children):
+        for _ in track(range(int(float(children[0]))), description="[cyan]Panda Processing..."):
+            time.sleep(0.1)
+
     def gt(self, c): return self.run(c[0]) > self.run(c[1])
     def lt(self, c): return self.run(c[0]) < self.run(c[1])
     def eq(self, c): return self.run(c[0]) == self.run(c[1])
-
-    def clear_screen(self, _): os.system('clear')
     def add(self, a): return self.run(a[0]) + self.run(a[1])
     def sub(self, a): return self.run(a[0]) - self.run(a[1])
     def mul(self, a): return self.run(a[0]) * self.run(a[1])
@@ -119,44 +134,26 @@ class PandaInterpreter:
     def get_var(self, a): return self.variables.get(str(a[0]), 0)
 
 # ==========================================
-# 🚀 CLI & REPL ENGINE (THE MAIN ENTRY)
+# 🚀 CLI ENGINE
 # ==========================================
 def start_repl():
-    verify_integrity()
-    show_logo()
-    console.print("[bold cyan]Panda Interactive Shell v0.3[/bold cyan]")
-    console.print("[dim white]Type 'niklo' to exit, 'saaf' to clear screen.[/dim white]\n")
-    
-    interpreter = PandaInterpreter()
-    parser = Lark(panda_grammar, parser='lalr')
-
+    verify_integrity(); show_logo()
+    console.print("[bold cyan]Panda Professional v0.6[/bold cyan] | Rizwan's Edition\n")
+    interpreter, parser = PandaInterpreter(), Lark(panda_grammar, parser='lalr')
     while True:
         try:
-            user_input = console.input("[bold pink]panda ❯ [/bold pink]")
-            if user_input.lower() in ["exit", "niklo", "quit", "exit()"]:
-                console.print("[bold yellow]🐼 Alvida, Rizwan![/bold yellow]")
-                break
-            if not user_input.strip(): continue
-            
-            tree = parser.parse(user_input)
-            interpreter.run(tree)
-        except Exception as e:
-            console.print(f"[bold red]Ghalti:[/bold red] {e}")
+            inp = console.input("[bold pink]panda ❯ [/bold pink]")
+            if inp.lower() in ["exit", "niklo"]: break
+            if not inp.strip(): continue
+            interpreter.run(parser.parse(inp))
+        except Exception as e: console.print(f"[bold red]Ghalti:[/bold red] {e}")
 
 if __name__ == "__main__":
-    # Check for arguments correctly
     args = [a for a in sys.argv[1:] if a.strip()]
-    
-    if not args:
-        start_repl()
+    if not args: start_repl()
     else:
         cmd = args[0]
-        if cmd == "--version":
-            console.print(Panel(f"PANDA 🐼 v{VERSION}\nDev: {DEVELOPER}", border_style="blue", expand=False))
-        elif os.path.exists(cmd):
+        if os.path.exists(cmd):
             p, i = Lark(panda_grammar, parser='lalr'), PandaInterpreter()
-            with open(cmd, 'r') as f:
-                try: i.run(p.parse(f.read()))
-                except Exception as e: console.print(f"[bold red]Panda Error:[/bold red] {e}")
-        else:
-            start_repl()
+            with open(cmd, 'r') as f: i.run(p.parse(f.read()))
+        else: start_repl()
