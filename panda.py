@@ -131,13 +131,29 @@ class PandaInterpreter:
             os.system(f'termux-tts-speak "{ans}"')
         except: console.print("[red]Internet connection required for AI.[/red]")
 
-    def system_status(self, _):
-        t = Table(title="Panda Status Monitor")
-        t.add_column("Resource")
-        t.add_column("Usage")
-        t.add_row("CPU", f"{psutil.cpu_percent()}%")
-        t.add_row("RAM", f"{psutil.virtual_memory().percent}%")
+        def system_status(self, _):
+        t = Table(title="[bold yellow]Panda Status Monitor[/bold yellow]", border_style="cyan")
+        t.add_column("Resource", style="bold magenta")
+        t.add_column("Usage", style="bold green")
+        
+        # RAM Info (Safe Way - No Permission Required)
+        try:
+            ram = psutil.virtual_memory().percent
+            t.add_row("RAM Used", f"{ram}%")
+        except:
+            t.add_row("RAM Used", "[red]Restricted[/red]")
+
+        # Battery Info (Termux-API Way - Legal and Safe)
+        try:
+            bat_json = os.popen("termux-battery-status").read()
+            import json
+            data = json.loads(bat_json)
+            t.add_row("Battery", f"{data['percentage']}% ({data['status']})")
+        except:
+            t.add_row("Battery", "[red]Check Termux-API[/red]")
+
         console.print(t)
+
 
     # --- 📂 Security & Files ---
     def file_lock(self, children):
