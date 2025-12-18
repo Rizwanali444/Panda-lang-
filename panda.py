@@ -32,19 +32,20 @@ def verify_integrity():
 
 def show_branding_banner():
     verify_integrity()
-    # Script chalte waqt chota cute banner
     banner_text = f"[bold yellow]( 🐼 )[/bold yellow] [bold cyan]PANDA ENGINE v{VERSION}[/bold cyan] | [bold white]By: {DEVELOPER}[/bold white]"
     console.print(banner_text)
     console.print("[dim white]──────────────────────────────────────────────────[/dim white]")
 
 def show_logo():
-    # Naya aur Cute ASCII Logo
+    # ✨ Naya Cute Panda Logo (Fixed for Termux)
     logo = r"""
-    [bold white]      pd      pd      [/bold white]
-    [bold white]    (  ^  ..  ^  )    [/bold white][bold cyan]  PANDA 🐼 v0.1[/bold cyan]
-    [bold white]     >   ^   <        [/bold white][bold yellow]  By Rizwan Ali[/bold yellow]
-    [bold white]    (    v    )       [/bold white]
-    [bold white]     (  _ _  )        [/bold white]
+[bold white]       .--.        .--.      [/bold white]
+[bold white]      /    \      /    \     [/bold white]
+[bold white]     |      \____/      |    [/bold white] [bold cyan]PANDA 🐼 v0.1[/bold cyan]
+[bold white]     |  [bold black]O[/bold black]          [bold black]O[/bold black]  |    [/bold white] [bold yellow]By Rizwan Ali[/bold yellow]
+[bold white]      \    [bold pink]  vv  [/bold pink]    /     [/bold white]
+[bold white]       \   [bold red]  ~~  [/bold red]   /      [/bold white]
+[bold white]        '--______--'       [/bold white]
     """
     console.print(Panel(logo, border_style="magenta", expand=False))
 
@@ -112,12 +113,12 @@ class PandaInterpreter:
     def get_var(self, a): return self.memory.get(str(a[0]), 0)
 
 # ==========================================
-# COMMAND LINE INTERFACE (FINAL POLISH)
+# COMMAND LINE INTERFACE (CLEANED)
 # ==========================================
 if __name__ == "__main__":
     verify_integrity()
     
-    # 1. Agar sirf 'panda' likha ho (No arguments)
+    # Check arguments
     if len(sys.argv) < 2:
         show_logo()
         console.print(f"[bold cyan]Panda Language v{VERSION}[/bold cyan]")
@@ -127,13 +128,12 @@ if __name__ == "__main__":
 
     arg = sys.argv[1]
 
-    # 2. Agar version check karna ho
     if arg == "--version":
         version_box = f"[bold green]PANDA 🐼[/bold green]\n[white]Version: {VERSION}[/white]\n[bold yellow]Dev: {DEVELOPER}[/bold yellow]"
         console.print(Panel(version_box, border_style="blue", title="System Info", expand=False))
     
-    # 3. Agar file run karni ho
     else:
+        # Script execution logic
         if os.path.exists(arg):
             show_branding_banner()
             try:
@@ -145,7 +145,7 @@ if __name__ == "__main__":
             except Exception as e:
                 console.print(f"[bold red]Panda Error 🐼:[/bold red] {e}")
         else:
-            # 4. Agar file name galat ho
+            # File not found error with Logo
             show_logo()
             console.print(f"[bold red]Ghalti:[/bold red] File [bold yellow]'{arg}'[/bold yellow] nahi mili!")
-            console.print("[white]Check karein ke file folder mein mojood hai.[/white]")
+            console.print("[white]Mashwara: Check karein ke file ka naam sahi hai.[/white]")
