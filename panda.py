@@ -9,16 +9,15 @@ from rich.align import Align
 from rich.progress import track
 
 # ==========================================
-# 🛠️ GLOBAL CONFIGURATION & UI
+# 🛠️ SYSTEM CONFIGURATION
 # ==========================================
 console = Console()
 DEVELOPER = "Rizwan Ali"
-VERSION = "2.5 (Final Master Edition)"
+VERSION = "3.0 (Ultimate Master Edition)"
 
 # ==========================================
-# 📝 PANDA MASTER GRAMMAR (Full Syntax)
+# 📝 MASTER GRAMMAR (Full Syntax)
 # ==========================================
-# Is grammar mein comments, loops, functions aur saare hardware commands shamil hain.
 panda_grammar = r"""
     start: (instruction | _comment)*
     
@@ -59,6 +58,8 @@ panda_grammar = r"""
                
                | ("volume" | "awaaz") NUMBER           -> set_volume
                | ("brightness" | "roshni") NUMBER      -> set_bright
+               | ("copy" | "copy_kar") STRING          -> set_clip
+               | ("paste" | "paste_kar")               -> get_clip
                | ("run" | "chalao") STRING             -> sys_run
                
                | ("time" | "waqt")                     -> show_time
@@ -85,7 +86,7 @@ panda_grammar = r"""
 """
 
 # ==========================================
-# ⚙️ INTERPRETER ENGINE (Logic Processing)
+# ⚙️ INTERPRETER CENTER
 # ==========================================
 class PandaInterpreter:
     def __init__(self):
@@ -104,17 +105,17 @@ class PandaInterpreter:
             if isinstance(child, Tree): res = self.run(child)
         return res
 
-    # --- 🏗️ Logic & Functions ---
+    # --- 🏗️ Functions & Logic ---
     def def_func(self, children):
         name = str(children[0]); body = children[1:]
         self.functions[name] = body
-        console.print(f"[bold cyan]◈ Function Defined: {name}[/bold cyan]")
+        console.print(f"[bold cyan]◈ Function Stored: {name}[/bold cyan]")
 
     def call_func(self, children):
         name = str(children[0])
         if name in self.functions:
             for node in self.functions[name]: self.run(node)
-        else: console.print(f"[red]Error: '{name}' nahi mila![/red]")
+        else: console.print(f"[red]Error: '{name}' missing![/red]")
 
     def if_else(self, children):
         cond = self.run(children[0])
@@ -129,10 +130,10 @@ class PandaInterpreter:
             self.variables[var] = float(i)
             for instr in children[3:]: self.run(instr)
 
-    # --- 🎵 Media & Apps ---
+    # --- 🎵 Media & Android ---
     def play_music(self, children):
         q = str(children[0]).strip('"')
-        console.print(f"[bold green]Searching YT Music for: {q}[/bold green]")
+        console.print(f"[bold green]Searching YT Music: {q}[/bold green]")
         url = f"https://music.youtube.com/search?q={q.replace(' ', '+')}"
         os.system(f"termux-open-url '{url}'")
 
@@ -150,11 +151,11 @@ class PandaInterpreter:
     def open_manager(self, _):
         os.system("am start -n com.android.documentsui/.files.FilesActivity")
 
-    # --- 📂 Security & Files ---
+    # --- 🛡️ Security & Files ---
     def write_file(self, children):
         fn, txt = str(children[0]).strip('"'), str(children[1]).strip('"')
         with open(fn, 'w') as f: f.write(txt)
-        console.print(f"[green]✔ Written: {fn}[/green]")
+        console.print(f"[green]File '{fn}' saved.[/green]")
 
     def read_file(self, children):
         fn = str(children[0]).strip('"')
@@ -166,9 +167,15 @@ class PandaInterpreter:
         if os.path.exists(fn):
             with open(fn, 'rb') as f: data = f.read()
             with open(fn, 'wb') as f: f.write(base64.b64encode(data))
-            console.print(f"[red]🔒 Locked: {fn}[/red]")
+            console.print(f"[red]Locked: {fn}[/red]")
 
-    # --- 📱 Hardware & Security Guard ---
+    def file_unlock(self, children):
+        fn = str(children[0]).strip('"')
+        if os.path.exists(fn):
+            with open(fn, 'rb') as f: data = f.read()
+            console.print(Panel(base64.b64decode(data).decode(), title="Unlocked"))
+
+    # --- 📱 Hardware & AI ---
     def system_status(self, _):
         t = Table(title="Panda System Report", show_lines=True)
         t.add_column("Monitor", style="cyan"); t.add_column("Usage", style="green")
@@ -176,45 +183,45 @@ class PandaInterpreter:
         try:
             bat = json.loads(os.popen("termux-battery-status").read())
             t.add_row("Battery", f"{bat['percentage']}% ({bat['status']})")
-            t.add_row("Health", bat['health'])
-        except: t.add_row("Battery", "Restricted")
+        except: t.add_row("Battery", "N/A")
         console.print(t)
-
-    def security_guard(self, _):
-        console.print(Panel("[bold red]PANDA GUARD ACTIVATED[/bold red]\nMonitoring sensors..."))
-        os.system('termux-tts-speak "Rizwan bhai, main pehra de raha hoon. Phone mat hilana."')
-
-    def flash_light(self, children):
-        os.system(f"termux-flashlight {str(children[0]).strip('\"')}")
-
-    def vibrate_mob(self, children):
-        os.system(f"termux-vibrate -d {int(float(children[0]))}")
-
-    # --- ⚙️ Core ---
-    def show_action(self, children): console.print(f"[bold green]>>>[/bold green] {self.run(children[0])}")
-    def speak_action(self, children): os.system(f'termux-tts-speak "{self.run(children[0])}"')
-    def clear_screen(self, _): os.system('clear')
-    def show_time(self, _): console.print(f"[yellow]Current Time:[/yellow] {datetime.now().strftime('%H:%M:%S')}")
-    def load_action(self, children):
-        for _ in track(range(int(float(children[0]))), description="Panda working..."): time.sleep(0.04)
 
     def ai_think(self, children):
         q = str(children[0]).strip('"')
+        console.print(f"[cyan]Panda AI is thinking: {q}...[/cyan]")
         try:
             r = requests.get(f"https://api.duckduckgo.com/?q={q}&format=json").json()
             ans = r.get("AbstractText", "Ilm nahi hai.")
-            console.print(Panel(ans, title="Panda AI Result"))
-        except: console.print("[red]Internet checking...[/red]")
+            console.print(Panel(ans, title="AI Response"))
+        except: console.print("[red]Internet check karein![/red]")
+
+    def flash_light(self, children):
+        s = str(children[0]).strip('"').lower()
+        os.system(f"termux-flashlight {s}")
+
+    def vibrate_mob(self, children):
+        d = int(float(children[0]))
+        os.system(f"termux-vibrate -d {d}")
+
+    # --- ⚙️ Core Operations ---
+    def show_action(self, children): console.print(f"[bold green]>>>[/bold green] {self.run(children[0])}")
+    def speak_action(self, children): os.system(f'termux-tts-speak "{self.run(children[0])}"')
+    def clear_screen(self, _): os.system('clear')
+    def show_time(self, _): console.print(f"[yellow]Waqt:[/yellow] {datetime.now().strftime('%H:%M:%S')}")
+    def load_action(self, children):
+        for _ in track(range(int(float(children[0]))), description="Panda working..."): time.sleep(0.05)
 
     def draw_shape(self, children):
         s, c = str(children[0]).strip('"').lower(), str(children[1]).strip('"').lower()
         if s == "panda": console.print(Align.center(Text("\n m( )m \n( ● .. ● )\n >  ♥  <\n", style=c)))
 
-    # --- ➕ Operations ---
     def assign_var(self, children): self.variables[str(children[0])] = self.run(children[1])
     def add(self, a):
         l, r = self.run(a[0]), self.run(a[1])
         return str(l) + str(r) if isinstance(l, str) or isinstance(r, str) else l + r
+    def sub(self, a): return self.run(a[0]) - self.run(a[1])
+    def mul(self, a): return self.run(a[0]) * self.run(a[1])
+    def div(self, a): return self.run(a[0]) / self.run(a[1])
     def gt(self, a): return self.run(a[0]) > self.run(a[1])
     def lt(self, a): return self.run(a[0]) < self.run(a[1])
     def eq(self, a): return self.run(a[0]) == self.run(a[1])
@@ -223,12 +230,12 @@ class PandaInterpreter:
     def get_var(self, a): return self.variables.get(str(a[0]), 0)
 
 # ==========================================
-# 🚀 RUNNER LOGIC
+# 🚀 RUNNER
 # ==========================================
 def start_repl():
     os.system("clear")
     logo = f"[bold white]PANDA ENGINE 🐼[/bold white]\n[bold green]{VERSION}[/bold green]\n[bold cyan]Developer: {DEVELOPER}[/bold cyan]"
-    console.print(Panel(Align.center(logo), border_style="bold green", padding=(1,2)))
+    console.print(Panel(Align.center(logo), border_style="bold green"))
     i, p = PandaInterpreter(), Lark(panda_grammar, parser='lalr')
     while True:
         try:
@@ -243,8 +250,7 @@ def run_file(filename):
         with open(filename, 'r') as f: script = f.read()
         i, p = PandaInterpreter(), Lark(panda_grammar, parser='lalr')
         try: i.run(p.parse(script))
-        except Exception as e: console.print(f"[bold red]❌ SCRIPT ERROR:[/bold red] {e}")
-    else: console.print(f"[red]Ghalti: '{filename}' file nahi mili![/red]")
+        except Exception as e: console.print(f"[red]Error in {filename}:[/red] {e}")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1: run_file(sys.argv[1])
