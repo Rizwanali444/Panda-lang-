@@ -1,7 +1,6 @@
 import sys
-import random
-import time
 import os
+import time
 import requests
 import base64
 import threading
@@ -19,10 +18,9 @@ console = Console()
 # ==========================================
 DEVELOPER = "Rizwan Ali"
 VERSION = "0.1"
-COPYRIGHT = f"© 2024-2025 {DEVELOPER}"
 
 def show_security_alert():
-    alert_text = "[bold white]🛑 SECURITY ALERT[/bold white]\n[white]Engine Integrity Compromised!\nModification not allowed.[/white]"
+    alert_text = "[bold white]🛑 SECURITY ALERT[/bold white]\n[white]Engine Integrity Compromised![/white]"
     console.print(Panel(alert_text, border_style="red", title="[bold red]Error[/bold red]", expand=False))
     sys.exit()
 
@@ -32,22 +30,21 @@ def verify_integrity():
 
 def show_branding_banner():
     verify_integrity()
-    banner_text = f"[bold yellow]( 🐼 )[/bold yellow] [bold cyan]PANDA ENGINE v{VERSION}[/bold cyan] | [bold white]By: {DEVELOPER}[/bold white]"
-    console.print(banner_text)
+    console.print(f"[bold yellow]( 🐼 )[/bold yellow] [bold cyan]PANDA ENGINE v{VERSION}[/bold cyan] | [bold white]By: {DEVELOPER}[/bold white]")
     console.print("[dim white]──────────────────────────────────────────────────[/dim white]")
 
 def show_logo():
-    # ✨ Super Cute & Colorful Panda Logo
-    logo = r"""
-[bold black]      _      _      [/bold black]
-[bold white]    m(  )mm(  )m    [/bold white]
-[bold white]   (  [/bold black]●[/bold black]  ..  [/bold black]●[/bold black]  )   [/bold white] [bold cyan]PANDA 🐼 v0.1[/bold cyan]
-[bold white]    >   [/bold pink]♥[/bold pink]   <     [/bold white] [bold yellow]By Rizwan Ali[/bold yellow]
-[bold white]   (    [/bold red]~~[/bold red]    )    [/bold white]
-[bold white]    (  [/bold cyan]v  v[/bold cyan]  )     [/bold white]
-[bold white]     [/bold black]""    ""[/bold black]      
-    """
-    console.print(Panel(logo, border_style="bold magenta", padding=(0, 2), expand=False))
+    # ✨ Fixed & Cute Panda Logo (No Markup Errors)
+    logo = (
+        "[bold white]      _      _      [/bold white]\n"
+        "[bold white]    m( )mm( )m    [/bold white]\n"
+        "[bold white]   (  [black]●[/black]  ..  [black]●[/black]  )   [/bold white] [bold cyan]PANDA 🐼 v0.1[/bold cyan]\n"
+        "[bold white]    >   [pink]♥[/pink]   <     [/bold white] [bold yellow]By Rizwan Ali[/bold yellow]\n"
+        "[bold white]   (    [red]~~[/red]    )    [/bold white]\n"
+        "[bold white]    (  [cyan]v  v[/cyan]  )     [/bold white]\n"
+        "[bold black]     \"\"    \"\"      [/bold black]"
+    )
+    console.print(Panel(logo, border_style="magenta", padding=(0, 2), expand=False))
 
 # ==========================================
 # PANDA GRAMMAR & INTERPRETER
@@ -113,40 +110,34 @@ class PandaInterpreter:
     def get_var(self, a): return self.memory.get(str(a[0]), 0)
 
 # ==========================================
-# COMMAND LINE INTERFACE (REPL SUPPORT)
+# COMMAND LINE INTERFACE
 # ==========================================
 if __name__ == "__main__":
     verify_integrity()
     
-    # INTERACTIVE SHELL (If only 'panda' is typed)
     if len(sys.argv) < 2:
         show_logo()
-        console.print(f"[bold cyan]Panda Interactive Shell v{VERSION}[/bold cyan]")
-        console.print("[dim white]Type 'niklo' or 'exit' to quit[/dim white]\n")
+        console.print(f"[bold cyan]Panda Shell Mode v{VERSION}[/bold cyan]")
+        console.print("[dim white]Exit karne ke liye 'niklo' likhein.[/dim white]\n")
         
         interpreter = PandaInterpreter()
         parser = Lark(panda_grammar, parser='lalr')
         
         while True:
             try:
-                code_line = console.input("[bold pink]panda ❯ [/bold pink]")
-                if code_line.lower() in ["exit", "exit()", "niklo", "quit"]:
-                    console.print("[yellow]Panda shell band ho raha hai. Phir milenge! 🐼[/yellow]")
-                    break
-                if not code_line.strip(): continue
-                
-                tree = parser.parse(code_line)
+                line = console.input("[bold pink]panda ❯ [/bold pink]")
+                if line.lower() in ["exit", "niklo", "quit"]: break
+                if not line.strip(): continue
+                tree = parser.parse(line)
                 interpreter.run(tree)
             except Exception as e:
-                console.print(f"[bold red]Error:[/bold red] {e}")
+                console.print(f"[bold red]Ghalti:[/bold red] {e}")
         sys.exit()
 
     arg = sys.argv[1]
-
     if arg == "--version":
         version_box = f"[bold green]PANDA 🐼[/bold green]\n[white]Version: {VERSION}[/white]\n[bold yellow]Dev: {DEVELOPER}[/bold yellow]"
         console.print(Panel(version_box, border_style="blue", title="System Info", expand=False))
-    
     else:
         if os.path.exists(arg):
             show_branding_banner()
@@ -157,8 +148,7 @@ if __name__ == "__main__":
                     tree = parser.parse(code)
                     PandaInterpreter().run(tree)
             except Exception as e:
-                console.print(f"[bold red]Panda Error 🐼:[/bold red] {e}")
+                console.print(f"[bold red]Panda Error:[/bold red] {e}")
         else:
             show_logo()
-            console.print(f"[bold red]Ghalti:[/bold red] File '{arg}' nahi mili!")
-            console.print("[white]Istimal:[/white] [bold yellow]panda <file.pd>[/bold yellow] ya sirf [bold yellow]panda[/bold yellow]")
+            console.print(f"[bold red]Error:[/bold red] File '{arg}' nahi mili!")
